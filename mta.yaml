@@ -1,7 +1,6 @@
 ID: odatafiltererror
-_schema-version: "2.1"
-description: SAPUI5 oData v4 Error on Grid Table (table.table) when using Sort or Filter
-  function
+_schema-version: '2.1'
+description: SAPUI5 oData v4 Error on Grid Table (table.table) when using Sort or Filter function
 parameters:
   deploy_mode: html5-repo
 version: 0.0.1
@@ -14,11 +13,24 @@ modules:
       memory: 256M
     requires:
       - name: odatafiltererror_html5_repo_runtime
+      - name: srv_api
+        group: destinations
+        properties:
+          forwardAuthToken: true
+          name: srv_api
+          url: '~{url}'
+      - name: odatafiltererror-uaa
   - name: odatafiltererror_ui_deployer
     type: com.sap.html5.application-content
     path: odatafiltererror_ui_deployer
     requires:
       - name: odatafiltererror_html5_repo_host
+    build-parameters:
+      requires:
+        - name: ui5
+          artifacts:
+            - './*'
+          target-path: resources/ui5
   - name: odatafiltererror-db
     type: hdb
     path: db
@@ -36,10 +48,17 @@ modules:
     provides:
       - name: srv_api
         properties:
-          url: ${default-url}
+          url: '${default-url}'
     requires:
       - name: odatafiltererror-db-hdi-container
       - name: odatafiltererror-uaa
+  - name: ui5
+    type: html5
+    path: ui5
+    build-parameters:
+      builder: grunt
+      supported-platforms: []
+      build-result: dist
 resources:
   - name: odatafiltererror_html5_repo_runtime
     parameters:
@@ -54,12 +73,12 @@ resources:
   - name: odatafiltererror-db-hdi-container
     type: com.sap.xs.hdi-container
     properties:
-      hdi-container-name: ${service-name}
+      hdi-container-name: '${service-name}'
   - name: odatafiltererror-uaa
     type: org.cloudfoundry.managed-service
     parameters:
       service-plan: application
       service: xsuaa
       config:
-        xsappname: odatafiltererror-${space}
+        xsappname: 'odatafiltererror-${space}'
         tenant-mode: dedicated
